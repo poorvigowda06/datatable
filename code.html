@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced jQuery DataTable</title>
+    
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.11.5/css/jquery.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- jQuery and DataTables JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.datatables.net/1.11.5/js/jquery.dataTables.min.js"></script>
+    
+    <!-- jQuery UI for Date Picker -->
+    <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f4f4f4;
+        }
+        .wrapper {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+            overflow-x: auto;
+        }
+        h4 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .filter-container {
+            margin-bottom: 15px;
+        }
+        select, input {
+            margin-right: 10px;
+            padding: 5px;
+        }
+    </style>
+    
+    <script>
+        $(document).ready(function() {
+            var table = $('#jqueryTable').DataTable({
+                "paging": true,
+                "pageLength": 5,
+                "lengthMenu": [5, 10, 25, 50, 100],
+                "searching": true,
+                "ordering": true,
+                "info": true,
+                "responsive": true,
+                "order": [[6, "desc"]],
+                "columnDefs": [
+                    { "targets": 6, "type": "num" }
+                ]
+            });
+
+            // Dropdown Filtering for Position
+            $('#positionFilter').on('change', function() {
+                table.column(1).search(this.value).draw();
+            });
+            
+            // Status Filtering
+            $('#statusFilter').on('change', function() {
+                var status = this.value;
+                table.column(10).search(status ? '^' + status + '$' : '', true, false).draw();
+            });
+
+            // Salary Range Filter (Min Salary)
+            $('#salaryFilter').on('input', function() {
+                var minSalary = parseInt($(this).val(), 10);
+                $('#salaryValue').text(minSalary);
+                $.fn.dataTable.ext.search.push(
+                    function(settings, data, dataIndex) {
+                        var salary = parseInt(data[6], 10) || 0;
+                        return salary >= minSalary;
+                    }
+                );
+                table.draw();
+            });
+
+            // Date Picker for Start Date Filter
+            $('#startDateFilter').datepicker({ dateFormat: 'yy/mm/dd' }).on("change", function() {
+                var date = this.value;
+                table.column(5).search(date ? '^' + date + '$' : '', true, false).draw();
+            });
+        });
+    </script>
+</head>
+<body>
+    <section class="wrapper">
+        <h4><i class="fas fa-table"></i> Enhanced jQuery DataTable</h4>
+
+        <!-- Filters -->
+        <div class="filter-container">
+            <label>Filter by Position:</label>
+            <select id="positionFilter">
+                <option value="">All</option>
+                <option value="Accountant">Accountant</option>
+                <option value="Software Engineer">Software Engineer</option>
+                <option value="Javascript Developer">Javascript Developer</option>
+            </select>
+            
+            <label>Filter by Status:</label>
+            <select id="statusFilter">
+                <option value="">All</option>
+                <option value="Active">Active</option>
+                <option value="Inactive">Inactive</option>
+            </select>
+            
+            <label>Filter by Salary (Min):</label>
+            <input type="range" id="salaryFilter" min="50000" max="500000" step="10000">
+            <span id="salaryValue">50000</span>
+            
+            <label>Filter by Start Date:</label>
+            <input type="text" id="startDateFilter" placeholder="YYYY/MM/DD">
+        </div>
+
+        <!-- Data Table -->
+        <table id="jqueryTable" class="display">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Position</th>
+                    <th>Office</th>
+                    <th>Age</th>
+                    <th>Department</th>
+                    <th>Start Date</th>
+                    <th>Salary</th>
+                    <th>Experience (Years)</th>
+                    <th>Phone</th>
+                    <th>Email</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Existing Rows -->
+                <tr><td>Tiger Nixon</td><td>System Architect</td><td>Edinburgh</td><td>61</td><td>IT</td><td>2011/04/25</td><td>320800</td><td>15</td><td>+44 123 456</td><td>tiger@example.com</td><td>Active</td></tr>
+                <tr><td>Airi Satou</td><td>Accountant</td><td>Tokyo</td><td>33</td><td>Finance</td><td>2008/11/28</td><td>162700</td><td>10</td><td>+81 987 654</td><td>airi@example.com</td><td>Inactive</td></tr>
+                <tr><td>Sonya Frost</td><td>Software Engineer</td><td>Edinburgh</td><td>23</td><td>Development</td><td>2008/12/13</td><td>103600</td><td>5</td><td>+44 234 567</td><td>sonya@example.com</td><td>Active</td></tr>
+                <!-- Added Rows -->
+                <tr><td>John Doe</td><td>Software Engineer</td><td>San Francisco</td><td>30</td><td>Development</td><td>2015/07/15</td><td>75000</td><td>8</td><td>+1 555 0101</td><td>johndoe@example.com</td><td>Active</td></tr>
+                <tr><td>Jane Smith</td><td>Accountant</td><td>New York</td><td>29</td><td>Finance</td><td>2016/03/10</td><td>60000</td><td>6</td><td>+1 555 0202</td><td>janesmith@example.com</td><td>Inactive</td></tr>
+                <tr><td>Michael Brown</td><td>Project Manager</td><td>Chicago</td><td>42</td><td>Management</td><td>2010/11/20</td><td>95000</td><td>12</td><td>+1 555 0303</td><td>michaelb@example.com</td><td>Active</td></tr>
+                <tr><td>Emily Davis</td><td>Graphic Designer</td><td>Los Angeles</td><td>28</td><td>Design</td><td>2017/06/17</td><td>50000</td><td>4</td><td>+1 555 0404</td><td>emilyd@example.com</td><td>Inactive</td></tr>
+                <tr><td>Mark Johnson</td><td>Sales Manager</td><td>Houston</td><td>35</td><td>Sales</td><td>2014/09/05</td><td>85000</td><td>9</td><td>+1 555 0505</td><td>markj@example.com</td><td>Active</td></tr>
+                <tr><td>Linda Lee</td><td>HR Specialist</td><td>Miami</td><td>40</td><td>HR</td><td>2013/02/22</td><td>72000</td><td>10</td><td>+1 555 0606</td><td>lindal@example.com</td><td>Active</td></tr>
+                <tr><td>Charles King</td><td>Marketing Manager</td><td>Dallas</td><td>50</td><td>Marketing</td><td>2006/11/12</td><td>100000</td><td>20</td><td>+1 555 0707</td><td>charlesk@example.com</td><td>Inactive</td></tr>
+                <tr><td>Sarah Scott</td><td>Product Manager</td><td>Boston</td><td>38</td><td>Product</td><td>2011/04/30</td><td>93000</td><td>15</td><td>+1 555 0808</td><td>sarahs@example.com</td><td>Active</td></tr>
+                <tr><td>David Adams</td><td>Web Developer</td><td>Seattle</td><td>26</td><td>Development</td><td>2019/12/05</td><td>62000</td><td>3</td><td>+1 555 0909</td><td>davidadams@example.com</td><td>Active</td></tr>
+            </tbody>
+        </table>
+    </section>
+</body>
+</html>
